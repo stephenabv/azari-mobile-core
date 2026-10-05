@@ -8,7 +8,9 @@ import { SolarMath } from '../../domain/calculation/SolarMath';
 import { Units } from '../../domain/units/Units';
 import type { CalculatorSeed } from '../../navigation/types';
 import { AppText, Button, Card, Slider } from '../../ui/components';
-import { useThemedStyles } from '../../ui/theme/ThemeContext';
+import { Icon } from '../../ui/icons';
+import { useCountUp } from '../../ui/motion';
+import { useTheme, useThemedStyles } from '../../ui/theme/ThemeContext';
 import type { Theme } from '../../ui/theme/theme';
 
 /** Home "Calculate Your Savings" card; hands its figures to the full calculator. */
@@ -17,11 +19,14 @@ export function SavingsCalculatorCard({
 }: {
   onGetQuote: (seed: CalculatorSeed) => void;
 }) {
+  const theme = useTheme();
   const styles = useThemedStyles(createStyles);
   const [bill, setBill] = useState(MONTHLY_BILL_CONFIG.defaultValue);
   const [rate, setRate] = useState(ELECTRIC_RATE_CONFIG.defaultValue);
   const estimate = SolarMath.estimateFromBill(bill, rate);
-  const size = SolarMath.formatSystemSize(estimate.systemSize);
+  // Tweens the figure as the sliders move; reduce-motion jumps straight to it.
+  const animatedSize = useCountUp(estimate.systemSize, 420);
+  const size = SolarMath.formatSystemSize(animatedSize);
 
   return (
     <Card>
@@ -48,15 +53,21 @@ export function SavingsCalculatorCard({
         formatValue={v => `${Units.peso(v)} per kWh`}
       />
       <View style={styles.result}>
-        <AppText variant="caption" tone="muted">
-          ESTIMATED SYSTEM SIZE
-        </AppText>
-        <AppText variant="display">
-          {size.value} <AppText variant="heading">{size.unit}</AppText>
-        </AppText>
+        <View style={styles.resultIcon}>
+          <Icon name="sun" size={20} color={theme.colors.accentText} />
+        </View>
+        <View>
+          <AppText variant="caption" tone="muted">
+            ESTIMATED SYSTEM SIZE
+          </AppText>
+          <AppText variant="display">
+            {size.value} <AppText variant="heading">{size.unit}</AppText>
+          </AppText>
+        </View>
       </View>
       <Button
         label="Get This System Quote"
+        icon="arrowRight"
         onPress={() =>
           onGetQuote({
             monthlyBill: bill,
@@ -83,6 +94,22 @@ const createStyles = (t: Theme) =>
       gap: t.spacing(2),
       flexWrap: 'wrap',
     },
-    result: { alignItems: 'center', marginVertical: t.spacing(5) },
+    result: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing(3),
+      marginVertical: t.spacing(4),
+      padding: t.spacing(3),
+      borderRadius: t.radius.md,
+      backgroundColor: t.colors.accentSoft,
+    },
+    resultIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: t.colors.surfaceRaised,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     note: { marginTop: t.spacing(3) },
   });

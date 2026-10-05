@@ -14,12 +14,17 @@ import type { RootScreenProps } from '../../navigation/types';
 import {
   AppText,
   Button,
+  Card,
   Chip,
   Notice,
   Screen,
   SegmentedControl,
   TextField,
 } from '../../ui/components';
+import { Icon, type IconName } from '../../ui/icons';
+import { FadeIn } from '../../ui/motion';
+import { useTheme, useThemedStyles } from '../../ui/theme/ThemeContext';
+import type { Theme } from '../../ui/theme/theme';
 import { useCalculatorDraft } from './CalculatorDraft';
 import { NumberField, normalizeDecimalInput } from './NumberField';
 
@@ -53,6 +58,8 @@ export function ApplianceEditorScreen({
   route,
 }: RootScreenProps<'ApplianceEditor'>) {
   const draft = useCalculatorDraft();
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useTheme();
   const editing =
     draft.values.appliances.find(a => a.id === route.params?.applianceId) ??
     null;
@@ -127,173 +134,243 @@ export function ApplianceEditorScreen({
       }
       testID="appliance-editor"
     >
-      <AppText variant="title" accessibilityRole="header">
-        {editing ? 'Edit Appliance' : 'Add Appliance'}
-      </AppText>
-      <AppText tone="muted" style={styles.sub}>
-        This helps our engineers design a system sized perfectly to wipe out
-        your monthly electricity bill.
-      </AppText>
+      <FadeIn style={styles.header}>
+        <View style={styles.headerIcon}>
+          <Icon name="bolt" size={22} color={colors.onAccent} />
+        </View>
+        <View style={styles.headerText}>
+          <AppText variant="title" accessibilityRole="header">
+            {editing ? 'Edit Appliance' : 'Add Appliance'}
+          </AppText>
+          <AppText variant="label" tone="muted">
+            This helps our engineers design a system sized perfectly to wipe out
+            your monthly electricity bill.
+          </AppText>
+        </View>
+      </FadeIn>
       {error ? <Notice tone="danger" text={error} /> : null}
 
-      <TextField
-        label="Appliance / Load Name"
-        placeholder="Ex. 1.5HP Inverter Aircon"
-        maxLength={80}
-        value={name}
-        onChangeText={setName}
-      />
-      <View style={styles.row}>
-        <View style={styles.grow}>
-          <NumberField
-            label={`Rating (${RATING_UNITS.find(u => u.id === unit)?.label})`}
-            value={rating}
-            onChangeValue={setRating}
-          />
-        </View>
-        <View style={styles.grow}>
-          <NumberField
-            label="Quantity"
-            decimals={0}
-            value={quantity}
-            onChangeValue={v => setQuantity(Math.floor(v))}
-          />
-        </View>
-      </View>
-      <View style={styles.chips}>
-        {RATING_UNITS.map(u => (
-          <Chip
-            key={u.id}
-            label={u.label}
-            selected={unit === u.id}
-            onPress={() => setUnit(u.id)}
-          />
-        ))}
-      </View>
-
-      <SegmentedControl
-        options={PATTERNS}
-        value={kind}
-        onChange={setKind}
-        accessibilityLabel="Usage pattern"
-      />
-
-      {kind === 'scheduled' ? (
-        <View style={styles.block}>
-          {windows.map((w, i) => (
-            <View key={i} style={styles.row}>
-              <View style={styles.grow}>
-                <TextField
-                  label="From"
-                  placeholder="HH:MM"
-                  keyboardType="number-pad"
-                  maxLength={5}
-                  value={w.from}
-                  onChangeText={v => setWindow(i, { from: formatTimeInput(v) })}
-                />
-              </View>
-              <View style={styles.grow}>
-                <TextField
-                  label="To"
-                  placeholder="HH:MM"
-                  keyboardType="number-pad"
-                  maxLength={5}
-                  value={w.to}
-                  onChangeText={v => setWindow(i, { to: formatTimeInput(v) })}
-                />
-              </View>
-              {windows.length > 1 ? (
-                <Button
-                  label="Remove"
-                  variant="ghost"
-                  compact
-                  onPress={() =>
-                    setWindows(list => list.filter((_, j) => j !== i))
-                  }
-                  style={styles.remove}
-                />
-              ) : null}
-            </View>
-          ))}
-          <AppText variant="caption" tone="muted">
-            Use 24-hour time, e.g. 18:30.
+      <FadeIn index={1}>
+        <Card style={styles.card}>
+          <AppText variant="heading" style={styles.cardTitle}>
+            Appliance details
           </AppText>
-          <Button
-            label="+ Add Schedule Usage"
-            variant="ghost"
-            compact
-            onPress={() => setWindows(list => [...list, { from: '', to: '' }])}
+          <TextField
+            label="Appliance / Load Name"
+            placeholder="Ex. 1.5HP Inverter Aircon"
+            maxLength={80}
+            value={name}
+            onChangeText={setName}
           />
-        </View>
-      ) : null}
-
-      {kind === 'estimate' ? (
-        <View style={styles.block}>
           <View style={styles.row}>
             <View style={styles.grow}>
-              <TextField
-                label="Day Time Usage (08:00–18:00)"
-                suffix="hrs"
-                keyboardType="decimal-pad"
-                value={dayHours}
-                onChangeText={v => setDayHours(normalizeDecimalInput(v))}
+              <NumberField
+                label={`Rating (${
+                  RATING_UNITS.find(u => u.id === unit)?.label
+                })`}
+                value={rating}
+                onChangeValue={setRating}
               />
             </View>
             <View style={styles.grow}>
-              <TextField
-                label="Night Time Usage (18:00–08:00)"
-                suffix="hrs"
-                keyboardType="decimal-pad"
-                value={nightHours}
-                onChangeText={v => setNightHours(normalizeDecimalInput(v))}
+              <NumberField
+                label="Quantity"
+                decimals={0}
+                value={quantity}
+                onChangeValue={v => setQuantity(Math.floor(v))}
               />
             </View>
           </View>
           <View style={styles.chips}>
-            <Chip
-              label="Day only (10h)"
-              onPress={() => {
-                setDayHours('10');
-                setNightHours('0');
-              }}
-            />
-            <Chip
-              label="Night only (14h)"
-              onPress={() => {
-                setDayHours('0');
-                setNightHours('14');
-              }}
-            />
+            {RATING_UNITS.map(u => (
+              <Chip
+                key={u.id}
+                label={u.label}
+                selected={unit === u.id}
+                onPress={() => setUnit(u.id)}
+              />
+            ))}
           </View>
-        </View>
-      ) : null}
+        </Card>
+      </FadeIn>
 
-      <AppText
-        variant="label"
+      <FadeIn index={2}>
+        <Card style={styles.card}>
+          <AppText variant="heading" style={styles.cardTitle}>
+            Usage pattern
+          </AppText>
+          <SegmentedControl
+            options={PATTERNS}
+            value={kind}
+            onChange={setKind}
+            accessibilityLabel="Usage pattern"
+          />
+
+          {kind === 'scheduled' ? (
+            <View style={styles.block}>
+              {windows.map((w, i) => (
+                <View key={i} style={styles.row}>
+                  <View style={styles.grow}>
+                    <TextField
+                      label="From"
+                      placeholder="HH:MM"
+                      keyboardType="number-pad"
+                      maxLength={5}
+                      value={w.from}
+                      onChangeText={v =>
+                        setWindow(i, { from: formatTimeInput(v) })
+                      }
+                    />
+                  </View>
+                  <View style={styles.grow}>
+                    <TextField
+                      label="To"
+                      placeholder="HH:MM"
+                      keyboardType="number-pad"
+                      maxLength={5}
+                      value={w.to}
+                      onChangeText={v =>
+                        setWindow(i, { to: formatTimeInput(v) })
+                      }
+                    />
+                  </View>
+                  {windows.length > 1 ? (
+                    <Button
+                      label="Remove"
+                      variant="ghost"
+                      compact
+                      onPress={() =>
+                        setWindows(list => list.filter((_, j) => j !== i))
+                      }
+                      style={styles.remove}
+                    />
+                  ) : null}
+                </View>
+              ))}
+              <AppText variant="caption" tone="muted">
+                Use 24-hour time, e.g. 18:30.
+              </AppText>
+              <Button
+                label="+ Add Schedule Usage"
+                variant="ghost"
+                compact
+                onPress={() =>
+                  setWindows(list => [...list, { from: '', to: '' }])
+                }
+              />
+            </View>
+          ) : null}
+
+          {kind === 'estimate' ? (
+            <View style={styles.block}>
+              <View style={styles.row}>
+                <View style={styles.grow}>
+                  <TextField
+                    label="Day Time Usage (08:00–18:00)"
+                    suffix="hrs"
+                    keyboardType="decimal-pad"
+                    value={dayHours}
+                    onChangeText={v => setDayHours(normalizeDecimalInput(v))}
+                  />
+                </View>
+                <View style={styles.grow}>
+                  <TextField
+                    label="Night Time Usage (18:00–08:00)"
+                    suffix="hrs"
+                    keyboardType="decimal-pad"
+                    value={nightHours}
+                    onChangeText={v => setNightHours(normalizeDecimalInput(v))}
+                  />
+                </View>
+              </View>
+              <View style={styles.chips}>
+                <Chip
+                  label="Day only (10h)"
+                  onPress={() => {
+                    setDayHours('10');
+                    setNightHours('0');
+                  }}
+                />
+                <Chip
+                  label="Night only (14h)"
+                  onPress={() => {
+                    setDayHours('0');
+                    setNightHours('14');
+                  }}
+                />
+              </View>
+            </View>
+          ) : null}
+        </Card>
+      </FadeIn>
+
+      <View
         style={styles.totals}
+        accessible
         accessibilityLiveRegion="polite"
-      >
-        {`Day (08:00–18:00): ${hours.day.toFixed(
+        accessibilityLabel={`Day (08:00–18:00): ${hours.day.toFixed(
           1,
         )}h · Night (18:00–08:00): ${hours.night.toFixed(
           1,
         )}h · Total: ${hours.total.toFixed(1)}h`}
-      </AppText>
+      >
+        {(
+          [
+            ['sun', 'Day', '08:00–18:00', hours.day],
+            ['sparkle', 'Night', '18:00–08:00', hours.night],
+            ['bolt', 'Total', 'per day', hours.total],
+          ] as ReadonlyArray<[IconName, string, string, number]>
+        ).map(([icon, label, range, value], i) => (
+          <FadeIn key={label} index={i + 3} style={styles.totalTile}>
+            <Icon name={icon} size={16} color={colors.accentText} />
+            <AppText
+              variant="caption"
+              tone="muted"
+            >{`${label} · ${range}`}</AppText>
+            <AppText variant="heading">{`${value.toFixed(1)}h`}</AppText>
+          </FadeIn>
+        ))}
+      </View>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  sub: { marginTop: 6, marginBottom: 20 },
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    alignItems: 'flex-start',
-  },
-  grow: { flexGrow: 1, flexBasis: 140 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
-  block: { marginTop: 20 },
-  remove: { marginTop: 26 },
-  totals: { marginTop: 20 },
-});
+const createStyles = (t: Theme) =>
+  StyleSheet.create({
+    header: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: t.spacing(3),
+      marginBottom: t.spacing(5),
+    },
+    headerIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: t.radius.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accent,
+    },
+    headerText: { flex: 1, gap: t.spacing(1) },
+    card: { marginBottom: t.spacing(4), padding: t.spacing(4) },
+    cardTitle: { marginBottom: t.spacing(3) },
+    row: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: t.spacing(3),
+      alignItems: 'flex-start',
+    },
+    grow: { flexGrow: 1, flexBasis: 140 },
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing(2) },
+    block: { marginTop: t.spacing(5) },
+    remove: { marginTop: 26 },
+    totals: { flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing(3) },
+    totalTile: {
+      flexGrow: 1,
+      flexBasis: 96,
+      gap: t.spacing(1),
+      padding: t.spacing(3),
+      borderRadius: t.radius.md,
+      backgroundColor: t.colors.accentSoft,
+    },
+  });

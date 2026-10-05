@@ -2,6 +2,8 @@ import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import type { BrandOption } from '../../domain/packages/InverterBrandCatalog';
 import { Chip, RemoteImage } from '../../ui/components';
+import { FadeIn } from '../../ui/motion';
+import { useResponsive } from '../../ui/responsive/useResponsive';
 
 export interface BrandFilterProps {
   options: readonly BrandOption[];
@@ -9,36 +11,49 @@ export interface BrandFilterProps {
   onChange: (key: string | null) => void;
 }
 
-/** "All brands" plus one chip per inverter brand found in the live catalog. */
+/**
+ * "All brands" plus one chip per inverter brand found in the live catalog,
+ * in an edge-to-edge horizontal scroller.
+ */
 export function BrandFilter({ options, value, onChange }: BrandFilterProps) {
+  const { gutter } = useResponsive();
+  const chips = [
+    { key: null, label: 'All brands', logoUrl: null },
+    ...options.map(option => ({
+      key: option.key,
+      label: `${option.label} (${option.packageCount})`,
+      logoUrl: option.logoUrl,
+    })),
+  ];
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.row}
+      style={{ marginHorizontal: -gutter }}
+      contentContainerStyle={[styles.row, { paddingHorizontal: gutter }]}
       accessibilityLabel="Filter by inverter brand"
     >
-      <Chip
-        label="All brands"
-        selected={value === null}
-        onPress={() => onChange(null)}
-      />
-      {options.map(option => (
-        <Chip
-          key={option.key}
-          label={`${option.label} (${option.packageCount})`}
-          selected={value === option.key}
-          onPress={() => onChange(value === option.key ? null : option.key)}
-          leading={
-            option.logoUrl ? (
-              <RemoteImage
-                source={option.logoUrl}
-                resizeMode="contain"
-                style={styles.logo}
-              />
-            ) : null
-          }
-        />
+      {chips.map((chip, index) => (
+        <FadeIn key={chip.key ?? 'all'} index={index} direction="left">
+          <Chip
+            label={chip.label}
+            selected={value === chip.key}
+            onPress={() =>
+              onChange(
+                chip.key === null || value === chip.key ? null : chip.key,
+              )
+            }
+            leading={
+              chip.logoUrl ? (
+                <RemoteImage
+                  source={chip.logoUrl}
+                  resizeMode="contain"
+                  style={styles.logo}
+                />
+              ) : null
+            }
+          />
+        </FadeIn>
       ))}
     </ScrollView>
   );

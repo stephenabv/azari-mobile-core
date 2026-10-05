@@ -1,16 +1,18 @@
 import React from 'react';
 import {
   ActivityIndicator,
-  Pressable,
   StyleSheet,
+  View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { Icon, type IconName } from '../icons';
+import { PressableScale } from '../motion/PressableScale';
 import { useThemedStyles } from '../theme/ThemeContext';
 import type { Theme } from '../theme/theme';
 import { AppText } from './AppText';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'night';
 
 export interface ButtonProps {
   label: string;
@@ -19,6 +21,8 @@ export interface ButtonProps {
   disabled?: boolean;
   loading?: boolean;
   compact?: boolean;
+  /** Optional trailing icon, e.g. an arrow on a call to action. */
+  icon?: IconName;
   accessibilityHint?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
@@ -31,14 +35,16 @@ export function Button({
   disabled = false,
   loading = false,
   compact = false,
+  icon,
   accessibilityHint,
   style,
   testID,
 }: ButtonProps) {
   const styles = useThemedStyles(createStyles);
   const inactive = disabled || loading;
+  const textStyle = styles[`${variant}Text`];
   return (
-    <Pressable
+    <PressableScale
       testID={testID}
       onPress={onPress}
       disabled={inactive}
@@ -47,34 +53,37 @@ export function Button({
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: inactive, busy: loading }}
       hitSlop={compact ? 8 : 0}
-      style={({ pressed }) => [
+      style={[
         styles.base,
         compact && styles.compact,
         styles[variant],
-        pressed && styles[`${variant}Pressed`],
         inactive && styles.disabled,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator
-          color={
-            variant === 'primary'
-              ? styles.onPrimary.color
-              : styles.onOther.color
-          }
-        />
+        <ActivityIndicator color={textStyle.color} />
       ) : (
-        <AppText
-          variant="label"
-          style={variant === 'primary' ? styles.onPrimary : styles.onOther}
-          numberOfLines={2}
-          align="center"
-        >
-          {label}
-        </AppText>
+        <View style={styles.row}>
+          <AppText
+            variant="label"
+            style={[styles.text, compact && styles.textCompact, textStyle]}
+            numberOfLines={2}
+            align="center"
+          >
+            {label}
+          </AppText>
+          {icon ? (
+            <Icon
+              name={icon}
+              size={compact ? 16 : 18}
+              color={textStyle.color}
+              strokeWidth={2.2}
+            />
+          ) : null}
+        </View>
       )}
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -88,17 +97,20 @@ const createStyles = (t: Theme) =>
       justifyContent: 'center',
     },
     compact: { minHeight: 36, paddingHorizontal: t.spacing(4) },
+    row: { flexDirection: 'row', alignItems: 'center', gap: t.spacing(2) },
+    text: { fontSize: 14 },
+    textCompact: { fontSize: 13 },
     primary: { backgroundColor: t.colors.accent },
-    primaryPressed: { backgroundColor: t.colors.accentPressed },
     secondary: {
       borderWidth: 1,
       borderColor: t.colors.border,
       backgroundColor: t.colors.surfaceRaised,
     },
-    secondaryPressed: { backgroundColor: t.colors.surface },
     ghost: { backgroundColor: 'transparent' },
-    ghostPressed: { opacity: 0.6 },
+    night: { backgroundColor: t.colors.night },
     disabled: { opacity: 0.5 },
-    onPrimary: { color: t.colors.onAccent, fontSize: 15 },
-    onOther: { color: t.colors.text, fontSize: 15 },
+    primaryText: { color: t.colors.onAccent },
+    secondaryText: { color: t.colors.text },
+    ghostText: { color: t.colors.accentText },
+    nightText: { color: t.colors.onNight },
   });

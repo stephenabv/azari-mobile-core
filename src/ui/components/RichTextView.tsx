@@ -2,11 +2,12 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ExternalLinks } from '../../core/media/ExternalLinks';
 import { parseRichText } from '../../domain/journey/RichText';
+import { FONTS } from '../theme/theme';
 import { AppText } from './AppText';
 
 const styles = StyleSheet.create({
   paragraph: { marginBottom: 10 },
-  bold: { fontWeight: '700' },
+  bold: { fontFamily: FONTS.bold },
   italic: { fontStyle: 'italic' },
   link: { textDecorationLine: 'underline' },
 });

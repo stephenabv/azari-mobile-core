@@ -1,7 +1,9 @@
 import React, { type ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { useThemedStyles } from '../theme/ThemeContext';
-import type { Theme } from '../theme/theme';
+import { StyleSheet, View } from 'react-native';
+import { Icon, type IconName } from '../icons';
+import { PressableScale } from '../motion/PressableScale';
+import { useTheme, useThemedStyles } from '../theme/ThemeContext';
+import { FONTS, type Theme } from '../theme/theme';
 import { AppText } from './AppText';
 
 export interface ChipProps {
@@ -9,6 +11,8 @@ export interface ChipProps {
   selected?: boolean;
   onPress?: () => void;
   leading?: ReactNode;
+  /** Shorthand for a leading stroke icon. */
+  icon?: IconName;
   accessibilityHint?: string;
 }
 
@@ -18,32 +22,28 @@ export function Chip({
   selected = false,
   onPress,
   leading,
+  icon,
   accessibilityHint,
 }: ChipProps) {
+  const theme = useTheme();
   const styles = useThemedStyles(createStyles);
+  const fg = selected ? theme.colors.background : theme.colors.text;
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
       disabled={!onPress}
       accessibilityRole={onPress ? 'button' : 'text'}
       accessibilityState={{ selected }}
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
-      style={({ pressed }) => [
-        styles.chip,
-        selected && styles.selected,
-        pressed && styles.pressed,
-      ]}
+      style={[styles.chip, selected && styles.selected]}
     >
       {leading}
-      <AppText
-        variant="label"
-        tone={selected ? 'inverse' : 'default'}
-        numberOfLines={1}
-      >
+      {icon ? <Icon name={icon} size={15} color={fg} strokeWidth={2} /> : null}
+      <AppText variant="label" numberOfLines={1} style={{ color: fg }}>
         {label}
       </AppText>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -53,14 +53,14 @@ export function Badge({
   tone = 'accent',
 }: {
   label: string;
-  tone?: 'accent' | 'muted';
+  tone?: 'accent' | 'muted' | 'sun';
 }) {
   const styles = useThemedStyles(createStyles);
   return (
-    <View style={[styles.badge, tone === 'muted' && styles.badgeMuted]}>
+    <View style={[styles.badge, styles[`badge_${tone}`]]}>
       <AppText
         variant="caption"
-        tone={tone === 'accent' ? 'inverse' : 'muted'}
+        tone={tone === 'muted' ? 'muted' : 'inverse'}
         style={styles.badgeText}
       >
         {label}
@@ -74,7 +74,7 @@ const createStyles = (t: Theme) =>
     chip: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: t.spacing(2),
+      gap: t.spacing(1.5),
       minHeight: 36,
       paddingHorizontal: t.spacing(3.5),
       borderRadius: t.radius.pill,
@@ -83,21 +83,21 @@ const createStyles = (t: Theme) =>
       backgroundColor: t.colors.surfaceRaised,
     },
     selected: {
-      backgroundColor: t.colors.accent,
-      borderColor: t.colors.accent,
+      backgroundColor: t.colors.text,
+      borderColor: t.colors.text,
     },
-    pressed: { opacity: 0.75 },
     badge: {
       alignSelf: 'flex-start',
       paddingHorizontal: t.spacing(2),
       paddingVertical: 2,
       borderRadius: t.radius.pill,
-      backgroundColor: t.colors.accent,
     },
-    badgeMuted: {
+    badge_accent: { backgroundColor: t.colors.accent },
+    badge_sun: { backgroundColor: t.colors.sun },
+    badge_muted: {
       backgroundColor: t.colors.surface,
       borderWidth: 1,
       borderColor: t.colors.border,
     },
-    badgeText: { fontWeight: '700' },
+    badgeText: { fontFamily: FONTS.bold, fontSize: 11, lineHeight: 15 },
   });

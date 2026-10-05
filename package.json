@@ -51,6 +51,7 @@
     "react-native-nitro-modules": "^0.37.1",
     "react-native-safe-area-context": "^5.10.1",
     "react-native-screens": "^4.28.0",
+    "react-native-svg": "^15.15.5",
     "react-test-renderer": "^19.2.3",
     "typescript": "^6.0.3"
   },
@@ -65,7 +66,8 @@
     "react-native-keychain": "^10.0.0",
     "react-native-mmkv": "^4.3.2",
     "react-native-safe-area-context": "^5.5.2",
-    "react-native-screens": "^4.28.0"
+    "react-native-screens": "^4.28.0",
+    "react-native-svg": ">=15.15.0"
   },
   "peerDependenciesMeta": {
     "@react-native-documents/picker": {
