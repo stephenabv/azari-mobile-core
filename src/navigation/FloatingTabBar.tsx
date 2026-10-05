@@ -26,6 +26,7 @@ export const TAB_ICONS: Record<keyof TabParamList, IconName> = {
 const BAR_HEIGHT = 64;
 const BAR_MARGIN = 16;
 const HIGHLIGHT = 48;
+const BAR_PADDING = 8;
 
 /** Space a tab screen leaves at the bottom so content clears the bar. */
 export function floatingTabBarClearance(bottomInset: number): number {
@@ -34,7 +35,9 @@ export function floatingTabBarClearance(bottomInset: number): number {
 
 /**
  * Icon-only floating tab bar. A translucent coral disc slides to the active
- * tab; each button keeps its route name as the accessibility label.
+ * tab; each button keeps its route name as the accessibility label. Slots are
+ * measured on the inner row (inside the bar's padding), so the disc is
+ * centred on every icon at any width.
  */
 export function FloatingTabBar({
   state,
@@ -69,57 +72,59 @@ export function FloatingTabBar({
       pointerEvents="box-none"
       style={[styles.wrap, { bottom: Math.max(insets.bottom, 8) + 8 }]}
     >
-      <View style={styles.bar} accessibilityRole="tablist" onLayout={onLayout}>
-        {slotWidth > 0 ? (
-          <Animated.View
-            pointerEvents="none"
-            style={[
-              styles.highlight,
-              {
-                left: (slotWidth - HIGHLIGHT) / 2,
-                transform: [{ translateX }],
-              },
-            ]}
-          />
-        ) : null}
-        {state.routes.map((route, index) => {
-          const focused = state.index === index;
-          const options = descriptors[route.key]?.options ?? {};
-          const label =
-            options.tabBarAccessibilityLabel ?? options.title ?? route.name;
-          const onPress = () => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
-            if (!focused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params);
-            }
-          };
-          const onLongPress = () =>
-            navigation.emit({ type: 'tabLongPress', target: route.key });
-          return (
-            <Pressable
-              key={route.key}
-              onPress={onPress}
-              onLongPress={onLongPress}
-              accessibilityRole="tab"
-              accessibilityLabel={label}
-              accessibilityState={{ selected: focused }}
-              testID={options.tabBarButtonTestID}
-              style={styles.slot}
-              hitSlop={4}
-            >
-              <Icon
-                name={TAB_ICONS[route.name as keyof TabParamList] ?? 'menu'}
-                size={22}
-                strokeWidth={focused ? 2.2 : 1.9}
-                color={focused ? styles.iconActive.color : styles.icon.color}
-              />
-            </Pressable>
-          );
-        })}
+      <View style={styles.bar} accessibilityRole="tablist">
+        <View style={styles.row} onLayout={onLayout}>
+          {slotWidth > 0 ? (
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.highlight,
+                {
+                  left: (slotWidth - HIGHLIGHT) / 2,
+                  transform: [{ translateX }],
+                },
+              ]}
+            />
+          ) : null}
+          {state.routes.map((route, index) => {
+            const focused = state.index === index;
+            const options = descriptors[route.key]?.options ?? {};
+            const label =
+              options.tabBarAccessibilityLabel ?? options.title ?? route.name;
+            const onPress = () => {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              });
+              if (!focused && !event.defaultPrevented) {
+                navigation.navigate(route.name, route.params);
+              }
+            };
+            const onLongPress = () =>
+              navigation.emit({ type: 'tabLongPress', target: route.key });
+            return (
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                onLongPress={onLongPress}
+                accessibilityRole="tab"
+                accessibilityLabel={label}
+                accessibilityState={{ selected: focused }}
+                testID={options.tabBarButtonTestID}
+                style={styles.slot}
+                hitSlop={4}
+              >
+                <Icon
+                  name={TAB_ICONS[route.name as keyof TabParamList] ?? 'menu'}
+                  size={22}
+                  strokeWidth={focused ? 2.2 : 1.9}
+                  color={focused ? styles.iconActive.color : styles.icon.color}
+                />
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
     </View>
   );
@@ -138,20 +143,21 @@ const createStyles = (t: Theme) =>
       maxWidth: 520,
       height: BAR_HEIGHT,
       borderRadius: BAR_HEIGHT / 2,
-      backgroundColor: t.colors.night,
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 8,
+      backgroundColor: t.dark ? 'rgba(22,22,22,0.92)' : t.colors.night,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: t.dark ? '#262626' : t.colors.night,
+      justifyContent: 'center',
+      paddingHorizontal: BAR_PADDING,
       shadowColor: '#000000',
       shadowOpacity: 0.3,
       shadowRadius: 18,
       shadowOffset: { width: 0, height: 10 },
       elevation: 12,
     },
+    row: { flexDirection: 'row', alignItems: 'center', height: HIGHLIGHT },
     highlight: {
       position: 'absolute',
-      top: (BAR_HEIGHT - HIGHLIGHT) / 2,
-      marginLeft: 8,
+      top: 0,
       width: HIGHLIGHT,
       height: HIGHLIGHT,
       borderRadius: HIGHLIGHT / 2,

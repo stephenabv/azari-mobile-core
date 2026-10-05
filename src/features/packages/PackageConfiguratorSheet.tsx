@@ -35,6 +35,9 @@ export interface PackageConfiguratorSheetProps {
 
 type SheetStepper = StepperProps & { key: string };
 
+/** Width of the docked detail panel on expanded (landscape tablet) screens. */
+const PANEL_WIDTH = 380;
+
 const describe = (line: PackageComponentLine | null, spec?: string) =>
   [
     [line?.component.brand, line?.component.model].filter(Boolean).join(' '),
@@ -61,7 +64,9 @@ export function PackageConfiguratorSheet({
   const theme = useTheme();
   const styles = useThemedStyles(createStyles);
   const insets = useSafeAreaInsets();
-  const { contentWidth, gutter } = useResponsive();
+  const { contentWidth, gutter, size } = useResponsive();
+  // Wide tablets show the sheet as a detail panel docked to the right edge.
+  const docked = size === 'expanded';
   const [expanded, setExpanded] = useState(false);
   const { pkg, inverterLine, batteryLine, panelLine } = config;
   const bounds = config.bounds(qty.inverter);
@@ -118,11 +123,11 @@ export function PackageConfiguratorSheet({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType={docked ? 'fade' : 'slide'}
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      <View style={styles.root}>
+      <View style={[styles.root, docked && styles.rootDocked]}>
         <Pressable
           style={[StyleSheet.absoluteFill, styles.backdrop]}
           onPress={onClose}
@@ -130,13 +135,17 @@ export function PackageConfiguratorSheet({
           accessibilityLabel="Close package details"
         />
         <View
-          style={[
-            styles.sheet,
-            { width: Math.min(contentWidth + gutter * 2, 600) },
-          ]}
+          style={
+            docked
+              ? [styles.sheet, styles.docked, { paddingTop: insets.top }]
+              : [
+                  styles.sheet,
+                  { width: Math.min(contentWidth + gutter * 2, 600) },
+                ]
+          }
           accessibilityViewIsModal
         >
-          <View style={styles.grabber} />
+          {docked ? null : <View style={styles.grabber} />}
           <View style={styles.header}>
             <View style={styles.headerText}>
               {pkg.ipRating ? (
@@ -312,6 +321,7 @@ function PackageDetails({
 const createStyles = (t: Theme) =>
   StyleSheet.create({
     root: { flex: 1, justifyContent: 'flex-end', alignItems: 'center' },
+    rootDocked: { justifyContent: 'center', alignItems: 'flex-end' },
     backdrop: { backgroundColor: t.colors.overlay },
     sheet: {
       maxHeight: '88%',
@@ -319,6 +329,14 @@ const createStyles = (t: Theme) =>
       borderTopLeftRadius: t.radius.xl,
       borderTopRightRadius: t.radius.xl,
       overflow: 'hidden',
+    },
+    docked: {
+      width: PANEL_WIDTH,
+      height: '100%',
+      maxHeight: '100%',
+      borderTopRightRadius: 0,
+      borderBottomLeftRadius: t.radius.xl,
+      justifyContent: 'space-between',
     },
     grabber: {
       alignSelf: 'center',

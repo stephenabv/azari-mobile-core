@@ -8,6 +8,7 @@ import type { CalculatorSeed, TalkInquiryParams } from './homeTypes';
 import {
   AppText,
   Button,
+  ButtonRow,
   Card,
   Grid,
   RemoteImage,
@@ -53,6 +54,36 @@ export interface HomeSectionDefinition {
   id?: string;
   visibilityKey: string;
   Component: ComponentType<HomeSectionProps>;
+  /**
+   * On tablets, adjacent `half` sections share a row as two columns. Phones
+   * always stack sections full width.
+   */
+  span?: 'full' | 'half';
+}
+
+/**
+ * Groups visible sections into layout rows: a run of two `half` sections
+ * becomes one two-column row; everything else gets a row of its own.
+ */
+export function homeRows(
+  sections: readonly HomeSectionDefinition[],
+  columns: boolean,
+): HomeSectionDefinition[][] {
+  const rows: HomeSectionDefinition[][] = [];
+  for (const section of sections) {
+    const last = rows[rows.length - 1];
+    if (
+      columns &&
+      section.span === 'half' &&
+      last?.length === 1 &&
+      last[0]?.span === 'half'
+    ) {
+      last.push(section);
+    } else {
+      rows.push([section]);
+    }
+  }
+  return rows;
 }
 
 const useStyles = () => useThemedStyles(createStyles);
@@ -380,18 +411,22 @@ function CallToActionSection({ content, actions }: HomeSectionProps) {
             {cta.description}
           </AppText>
         </View>
-        <View style={styles.actions}>
-          <Button
-            label={cta.primaryCta || 'Get a free Quote'}
-            icon="arrowRight"
-            onPress={() => actions.openCalculator()}
-          />
-          <Button
-            label={cta.secondaryCta || 'Talk to an Expert'}
-            variant="secondary"
-            onPress={() => actions.talkToExpert()}
-          />
-        </View>
+        <ButtonRow
+          style={styles.actions}
+          actions={[
+            {
+              key: 'quote',
+              label: cta.primaryCta || 'Get a free Quote',
+              onPress: () => actions.openCalculator(),
+            },
+            {
+              key: 'expert',
+              label: cta.secondaryCta || 'Talk to an Expert',
+              variant: 'onNight',
+              onPress: () => actions.talkToExpert(),
+            },
+          ]}
+        />
       </Card>
     </FadeIn>
   );
@@ -404,8 +439,8 @@ function CallToActionSection({ content, actions }: HomeSectionProps) {
  */
 export const HOME_SECTIONS: readonly HomeSectionDefinition[] = [
   { id: 'stories', visibilityKey: 'clientJourney', Component: StoriesRow },
-  { visibilityKey: 'hero', Component: HeroCard },
-  { visibilityKey: 'quickActions', Component: QuickActions },
+  { visibilityKey: 'hero', Component: HeroCard, span: 'half' },
+  { visibilityKey: 'quickActions', Component: QuickActions, span: 'half' },
   { visibilityKey: 'packages', Component: PackageCarousel },
   { visibilityKey: 'benefits', Component: BenefitsSection },
   { visibilityKey: 'metrics', Component: MetricsSection },
@@ -482,12 +517,7 @@ const createStyles = (t: Theme) =>
     quote: { marginTop: t.spacing(1) },
     watch: { alignSelf: 'flex-start', paddingHorizontal: 0 },
     journey: { alignSelf: 'flex-start', marginTop: t.spacing(3) },
-    actions: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: t.spacing(3),
-      marginTop: t.spacing(5),
-    },
+    actions: { marginTop: t.spacing(5) },
     ctaWrap: { marginBottom: t.spacing(8) },
     cta: { padding: t.spacing(6), borderRadius: t.radius.xl },
     ctaSun: { position: 'absolute', right: -50, bottom: -50 },

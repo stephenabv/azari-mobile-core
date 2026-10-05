@@ -9,10 +9,23 @@ import {
 import { Icon, type IconName } from '../icons';
 import { PressableScale } from '../motion/PressableScale';
 import { useThemedStyles } from '../theme/ThemeContext';
-import type { Theme } from '../theme/theme';
+import { GRADIENTS, type Theme } from '../theme/theme';
 import { AppText } from './AppText';
+import { GradientFill } from './GradientFill';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'night';
+/**
+ * Labels always stay on one line; a label that would not fit shrinks a
+ * little instead of wrapping or clipping.
+ */
+const MIN_FONT_SCALE = 0.8;
+
+/** `onNight` is the outlined button for dark hero and call-to-action cards. */
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'ghost'
+  | 'night'
+  | 'onNight';
 
 export interface ButtonProps {
   label: string;
@@ -61,6 +74,9 @@ export function Button({
         style,
       ]}
     >
+      {variant === 'primary' ? (
+        <GradientFill colors={GRADIENTS.action} />
+      ) : null}
       {loading ? (
         <ActivityIndicator color={textStyle.color} />
       ) : (
@@ -68,7 +84,9 @@ export function Button({
           <AppText
             variant="label"
             style={[styles.text, compact && styles.textCompact, textStyle]}
-            numberOfLines={2}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={MIN_FONT_SCALE}
             align="center"
           >
             {label}
@@ -95,10 +113,17 @@ const createStyles = (t: Theme) =>
       borderRadius: t.radius.pill,
       alignItems: 'center',
       justifyContent: 'center',
+      overflow: 'hidden',
     },
     compact: { minHeight: 36, paddingHorizontal: t.spacing(4) },
-    row: { flexDirection: 'row', alignItems: 'center', gap: t.spacing(2) },
-    text: { fontSize: 14 },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: t.spacing(2),
+      maxWidth: '100%',
+    },
+    text: { fontSize: 14, flexShrink: 1 },
     textCompact: { fontSize: 13 },
     primary: { backgroundColor: t.colors.accent },
     secondary: {
@@ -108,9 +133,15 @@ const createStyles = (t: Theme) =>
     },
     ghost: { backgroundColor: 'transparent' },
     night: { backgroundColor: t.colors.night },
+    onNight: {
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.28)',
+      backgroundColor: 'rgba(255,255,255,0.06)',
+    },
     disabled: { opacity: 0.5 },
     primaryText: { color: t.colors.onAccent },
     secondaryText: { color: t.colors.text },
     ghostText: { color: t.colors.accentText },
     nightText: { color: t.colors.onNight },
+    onNightText: { color: t.colors.onNight },
   });

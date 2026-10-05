@@ -49,57 +49,73 @@ export interface Theme {
 }
 
 const BRAND = {
-  coral: '#FA6E52',
-  coralPressed: '#E85A3F',
+  coral: '#FC615A',
+  coralPressed: '#E54E47',
   sun: '#FFD600',
-  night: '#121318',
+  night: '#111111',
 } as const;
 
+/**
+ * Website gradients (azari.solar), as ordered colour stops. Primary buttons
+ * use `action`; the logo uses `sun` for its rays and `panels` for its stripes.
+ */
+export const GRADIENTS = Object.freeze({
+  action: ['#FA8248', '#FC5C5C'],
+  sun: ['#FFE800', '#FFD600', '#FFD100'],
+  panels: ['#FA8248', '#FC5C5C'],
+} as const satisfies Record<string, readonly string[]>);
+
+/** Full-screen loader surface: the website's page loader colours. */
+export const LOADER_SURFACE = Object.freeze({
+  dark: '#0A0A0A',
+  light: '#F4F4F4',
+});
+
 const LIGHT: Palette = {
-  background: '#F6F5F2',
-  surface: '#ECEAE5',
+  background: '#F4F4F4',
+  surface: '#E9E9E9',
   surfaceRaised: '#FFFFFF',
-  border: '#E2E0DA',
-  text: '#15161A',
-  textMuted: '#5B5E66',
+  border: '#E2E2E2',
+  text: '#111111',
+  textMuted: '#5E6168',
   accent: BRAND.coral,
   accentPressed: BRAND.coralPressed,
-  onAccent: '#15161A',
-  accentText: '#C73E2C',
-  accentSoft: '#FFE9E4',
+  onAccent: '#0A0A0A',
+  accentText: '#C9372F',
+  accentSoft: '#FFE7E3',
   sun: BRAND.sun,
   night: BRAND.night,
   onNight: '#FFFFFF',
-  onNightMuted: '#B4B7BF',
+  onNightMuted: '#9A9DA3',
   tabHighlight: 'rgba(250,110,82,0.8)',
   danger: '#C62828',
   success: '#1E7E34',
   overlay: 'rgba(0,0,0,0.55)',
-  skeleton: '#E6E4DF',
-  shadow: '#14141E',
+  skeleton: '#E6E6E6',
+  shadow: '#0A0A0A',
 };
 
 const DARK: Palette = {
-  background: '#0E0F13',
-  surface: '#1F2128',
-  surfaceRaised: '#17191F',
-  border: '#2A2C34',
-  text: '#F5F5F7',
-  textMuted: '#A3A6AE',
+  background: '#0A0A0A',
+  surface: '#1C1C1C',
+  surfaceRaised: '#141414',
+  border: '#262626',
+  text: '#EDEDED',
+  textMuted: '#9A9DA3',
   accent: BRAND.coral,
   accentPressed: BRAND.coralPressed,
-  onAccent: '#15161A',
-  accentText: '#FF8A70',
-  accentSoft: '#3A211C',
+  onAccent: '#0A0A0A',
+  accentText: '#FC615A',
+  accentSoft: '#2A1714',
   sun: BRAND.sun,
-  night: '#1C1E25',
+  night: '#161616',
   onNight: '#FFFFFF',
-  onNightMuted: '#B4B7BF',
+  onNightMuted: '#9A9DA3',
   tabHighlight: 'rgba(250,110,82,0.8)',
   danger: '#FF6B6B',
   success: '#4ADE80',
   overlay: 'rgba(0,0,0,0.7)',
-  skeleton: '#22242B',
+  skeleton: '#1A1A1A',
   shadow: '#000000',
 };
 

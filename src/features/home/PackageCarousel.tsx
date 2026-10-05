@@ -8,6 +8,7 @@ import {
   Badge,
   Card,
   RemoteImage,
+  RibbonBadge,
   Section,
   Skeleton,
 } from '../../ui/components';
@@ -95,20 +96,20 @@ export function PackageCarousel({ actions, packages }: HomeSectionProps) {
                   accessibilityHint="Opens the package catalog"
                   style={styles.card}
                 >
-                  <View>
+                  <View style={styles.media}>
                     <RemoteImage
                       source={item.pkg.imageUrl}
                       aspectRatio={16 / 9}
                       resizeMode="cover"
                     />
-                    <View style={styles.badges}>
-                      {item.pkg.isRecommended ? (
-                        <Badge label="Recommended" />
-                      ) : null}
-                      {item.pkg.ipRating ? (
+                    {item.pkg.isRecommended ? (
+                      <RibbonBadge label="Recommended" />
+                    ) : null}
+                    {item.pkg.ipRating ? (
+                      <View style={styles.badges}>
                         <Badge label={item.pkg.ipRating.code} tone="sun" />
-                      ) : null}
-                    </View>
+                      </View>
+                    ) : null}
                   </View>
                   <View style={styles.body}>
                     <AppText variant="heading" numberOfLines={1}>
@@ -138,12 +139,11 @@ export function PackageCarousel({ actions, packages }: HomeSectionProps) {
 const createStyles = (t: Theme) =>
   StyleSheet.create({
     card: { padding: 0, overflow: 'hidden', flex: 1 },
+    media: { overflow: 'hidden' },
     badges: {
       position: 'absolute',
-      left: t.spacing(3),
+      right: t.spacing(3),
       top: t.spacing(3),
-      flexDirection: 'row',
-      gap: t.spacing(1.5),
     },
     body: { padding: t.spacing(3.5), gap: t.spacing(2) },
     specs: { flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing(1.5) },

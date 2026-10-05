@@ -7,12 +7,18 @@ import {
 import type { SolarPackage } from '../../domain/packages/types';
 import { SolarMath } from '../../domain/calculation/SolarMath';
 import { Units } from '../../domain/units/Units';
-import { AppText, Badge, RemoteImage } from '../../ui/components';
+import {
+  AppText,
+  Badge,
+  GradientFill,
+  RemoteImage,
+  RibbonBadge,
+} from '../../ui/components';
 import { SunRays } from '../../ui/brand';
 import { Icon } from '../../ui/icons';
 import { PressableScale, Shimmer } from '../../ui/motion';
 import { useTheme, useThemedStyles } from '../../ui/theme/ThemeContext';
-import { FONTS, type Theme } from '../../ui/theme/theme';
+import { FONTS, GRADIENTS, type Theme } from '../../ui/theme/theme';
 import { PackageConfiguratorSheet } from './PackageConfiguratorSheet';
 
 export interface PackageCardProps {
@@ -80,16 +86,12 @@ export function PackageCard({ pkg, onInquire }: PackageCardProps) {
                 style={[styles.sheen, { width: mediaWidth * 0.4 }]}
               />
             ) : null}
-            <View style={styles.badges}>
-              {pkg.isRecommended ? (
-                <Badge label="Recommended" tone="sun" />
-              ) : (
-                <View />
-              )}
-              {pkg.ipRating ? (
+            {pkg.isRecommended ? <RibbonBadge label="Recommended" /> : null}
+            {pkg.ipRating ? (
+              <View style={styles.badges}>
                 <Badge label={pkg.ipRating.code} tone="muted" />
-              ) : null}
-            </View>
+              </View>
+            ) : null}
           </View>
           <View style={styles.body}>
             <AppText variant="label" numberOfLines={2} style={styles.name}>
@@ -140,10 +142,11 @@ export function PackageCard({ pkg, onInquire }: PackageCardProps) {
             accessibilityLabel={`Inquire about ${name}`}
             style={styles.inquire}
           >
+            <GradientFill colors={GRADIENTS.action} />
             <Icon
               name="arrowRight"
               size={16}
-              color={theme.colors.onNight}
+              color={theme.colors.onAccent}
               strokeWidth={2.4}
             />
           </PressableScale>
@@ -212,11 +215,7 @@ const createStyles = (t: Theme) =>
     badges: {
       position: 'absolute',
       top: t.spacing(2.5),
-      left: t.spacing(2.5),
       right: t.spacing(2.5),
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      gap: t.spacing(1),
     },
     body: { padding: t.spacing(3), paddingBottom: 0, gap: 2 },
     name: { fontFamily: FONTS.bold, marginBottom: 2 },
@@ -249,6 +248,6 @@ const createStyles = (t: Theme) =>
       borderRadius: 18,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: t.colors.night,
+      overflow: 'hidden',
     },
   });

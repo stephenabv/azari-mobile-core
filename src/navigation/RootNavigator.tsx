@@ -11,6 +11,7 @@ import { ProposalRequestScreen } from '../features/calculator/ProposalRequestScr
 import { ProposalSubmittedScreen } from '../features/calculator/ProposalSubmittedScreen';
 import { HomeScreen } from '../features/home/HomeScreen';
 import { PackageInquiryScreen } from '../features/inquiry/PackageInquiryScreen';
+import { ConnectScreen } from '../features/connect/ConnectScreen';
 import { ClientJourneyScreen } from '../features/journey/ClientJourneyScreen';
 import {
   PrivacyPolicyScreen,
@@ -157,6 +158,11 @@ export function RootNavigator() {
         name="TermsConditions"
         component={TermsConditionsScreen}
         options={{ title: 'Terms and Conditions' }}
+      />
+      <Stack.Screen
+        name="ConnectWithUs"
+        component={ConnectScreen}
+        options={{ title: 'Connect with Us' }}
       />
       <Stack.Screen
         name="PhotoViewer"
