@@ -14,6 +14,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTabBarInset } from '../layout/TabBarInset';
 import { useResponsive } from '../responsive/useResponsive';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -47,6 +48,9 @@ export function Screen({
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { gutter, contentWidth } = useResponsive();
+  // Inside the tabs the floating bar already clears the home indicator.
+  const tabInset = useTabBarInset();
+  const bottomInset = tabInset > 0 ? tabInset : insets.bottom;
 
   const dynamic = useMemo(
     () =>
@@ -54,19 +58,28 @@ export function Screen({
         root: { backgroundColor: theme.colors.background },
         scroll: {
           paddingTop: (padTop ? insets.top : 0) + theme.spacing(4),
-          paddingBottom: (footer ? 0 : insets.bottom) + theme.spacing(8),
+          paddingBottom: (footer ? 0 : bottomInset) + theme.spacing(8),
           paddingHorizontal: fullWidth ? 0 : gutter,
         },
         column: { width: fullWidth ? '100%' : contentWidth },
         footer: {
           paddingHorizontal: gutter,
           paddingTop: theme.spacing(3),
-          paddingBottom: insets.bottom + theme.spacing(3),
+          paddingBottom: bottomInset + theme.spacing(3),
           borderTopColor: theme.colors.border,
           backgroundColor: theme.colors.background,
         },
       }),
-    [theme, insets, gutter, contentWidth, padTop, footer, fullWidth],
+    [
+      theme,
+      insets,
+      bottomInset,
+      gutter,
+      contentWidth,
+      padTop,
+      footer,
+      fullWidth,
+    ],
   );
 
   const body = (

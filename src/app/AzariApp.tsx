@@ -15,6 +15,7 @@ import { linking } from '../navigation/linking';
 import { RootNavigator } from '../navigation/RootNavigator';
 import { RateLimitBanner } from '../ui/components';
 import { ThemeProvider, useTheme } from '../ui/theme/ThemeContext';
+import { AnimatedSplash } from './AnimatedSplash';
 import { AppGate } from './AppGate';
 import {
   createAppServices,
@@ -28,9 +29,11 @@ export interface AzariAppProps {
   adapter: PlatformAdapter;
   /** Tests only. */
   overrides?: ServiceOverrides;
+  /** Show the animated brand intro on launch. Defaults to true. */
+  splash?: boolean;
 }
 
-function ThemedNavigation() {
+function ThemedNavigation({ splash }: { splash: boolean }) {
   const theme = useTheme();
   const navTheme = useMemo<NavTheme>(() => {
     const base = theme.dark ? DarkTheme : DefaultTheme;
@@ -41,6 +44,7 @@ function ThemedNavigation() {
         primary: theme.colors.accent,
         background: theme.colors.background,
         card: theme.colors.background,
+        notification: theme.colors.accent,
         text: theme.colors.text,
         border: theme.colors.border,
       },
@@ -56,12 +60,18 @@ function ThemedNavigation() {
         </AppGate>
       </NavigationContainer>
       <RateLimitBanner />
+      {splash ? <AnimatedSplash /> : null}
     </View>
   );
 }
 
 /** Root component each app shell renders with its config and platform adapter. */
-export function AzariApp({ config, adapter, overrides }: AzariAppProps) {
+export function AzariApp({
+  config,
+  adapter,
+  overrides,
+  splash = true,
+}: AzariAppProps) {
   const [services] = useState<AppServices>(() =>
     createAppServices(config, adapter, overrides),
   );
@@ -71,7 +81,7 @@ export function AzariApp({ config, adapter, overrides }: AzariAppProps) {
         <QueryClientProvider client={services.queryClient}>
           <ThemeProvider>
             <CalculatorDraftProvider>
-              <ThemedNavigation />
+              <ThemedNavigation splash={splash} />
             </CalculatorDraftProvider>
           </ThemeProvider>
         </QueryClientProvider>

@@ -39,7 +39,7 @@ export function RateLimitBanner() {
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"
     >
-      <AppText variant="label" tone="inverse" align="center">
+      <AppText variant="label" tone="onNight" align="center">
         Too many requests. Please try again in {seconds}s.
       </AppText>
     </View>

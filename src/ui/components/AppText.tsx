@@ -10,7 +10,9 @@ export type TextTone =
   | 'accent'
   | 'danger'
   | 'success'
-  | 'inverse';
+  | 'inverse'
+  | 'onNight'
+  | 'onNightMuted';
 
 export interface AppTextProps extends TextProps {
   variant?: TextVariant;
@@ -30,10 +32,12 @@ export function AppText({
   const color = {
     default: theme.colors.text,
     muted: theme.colors.textMuted,
-    accent: theme.colors.accent,
+    accent: theme.colors.accentText,
     danger: theme.colors.danger,
     success: theme.colors.success,
     inverse: theme.colors.onAccent,
+    onNight: theme.colors.onNight,
+    onNightMuted: theme.colors.onNightMuted,
   }[tone];
   return (
     <Text

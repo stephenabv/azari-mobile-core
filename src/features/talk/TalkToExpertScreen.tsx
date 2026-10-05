@@ -10,14 +10,13 @@ import {
 } from '../../domain/talk/TalkInquiry';
 import type { RootScreenProps } from '../../navigation/types';
 import {
-  AppText,
   Button,
   Chip,
   LocationField,
   Notice,
   TextField,
 } from '../../ui/components';
-import { FormSheet } from '../forms/FormSheet';
+import { FormSection, FormSheet } from '../forms/FormSheet';
 import { useForm } from '../forms/useForm';
 import { useSubmission } from '../forms/useSubmission';
 
@@ -61,9 +60,11 @@ export function TalkToExpertScreen({
     <FormSheet
       title="Talk to an Expert"
       subtitle="Tell us about your energy needs and we will reach out."
+      icon="chat"
       footer={
         <Button
           label="Send Message"
+          icon="arrowRight"
           loading={isSubmitting}
           onPress={() => void send()}
           testID="talk-submit"
@@ -72,59 +73,68 @@ export function TalkToExpertScreen({
       testID="talk-screen"
     >
       {formError ? <Notice tone="danger" text={formError} /> : null}
-      <AppText variant="label">Inquiry type</AppText>
-      <View style={styles.types}>
-        {TALK_INQUIRY_TYPES.map(t => (
-          <Chip
-            key={t.id}
-            label={t.label}
-            selected={form.values.inquiryType === t.id}
-            onPress={() => form.replace({ ...form.values, inquiryType: t.id })}
-          />
-        ))}
-      </View>
-      <TextField
-        label="Full name"
-        autoComplete="name"
-        textContentType="name"
-        maxLength={80}
-        {...field('name')}
-      />
-      <TextField
-        label="Email address"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoComplete="email"
-        textContentType="emailAddress"
-        maxLength={120}
-        {...field('email')}
-      />
-      <TextField
-        label="Phone number"
-        keyboardType="phone-pad"
-        autoComplete="tel"
-        textContentType="telephoneNumber"
-        placeholder="09123456789"
-        maxLength={16}
-        {...field('phone')}
-      />
-      <LocationField
-        label="City"
-        maxLength={80}
-        {...field('city')}
-        onSelect={s => {
-          form.set('city', (s.city ?? s.label).slice(0, 80));
-          if (s.province) form.set('province', s.province.slice(0, 80));
-        }}
-      />
-      <TextField label="Province" maxLength={80} {...field('province')} />
-      <TextField
-        label="Message"
-        multiline
-        maxLength={1000}
-        helper={`${form.values.message.trim().length}/1000`}
-        {...field('message')}
-      />
+      <FormSection title="Inquiry type" icon="sparkle" index={0}>
+        <View style={styles.types}>
+          {TALK_INQUIRY_TYPES.map(t => (
+            <Chip
+              key={t.id}
+              label={t.label}
+              selected={form.values.inquiryType === t.id}
+              onPress={() =>
+                form.replace({ ...form.values, inquiryType: t.id })
+              }
+            />
+          ))}
+        </View>
+      </FormSection>
+      <FormSection title="Your details" icon="phone" index={1}>
+        <TextField
+          label="Full name"
+          autoComplete="name"
+          textContentType="name"
+          maxLength={80}
+          {...field('name')}
+        />
+        <TextField
+          label="Email address"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+          textContentType="emailAddress"
+          maxLength={120}
+          {...field('email')}
+        />
+        <TextField
+          label="Phone number"
+          keyboardType="phone-pad"
+          autoComplete="tel"
+          textContentType="telephoneNumber"
+          placeholder="09123456789"
+          maxLength={16}
+          {...field('phone')}
+        />
+      </FormSection>
+      <FormSection title="Location" icon="pin" index={2}>
+        <LocationField
+          label="City"
+          maxLength={80}
+          {...field('city')}
+          onSelect={s => {
+            form.set('city', (s.city ?? s.label).slice(0, 80));
+            if (s.province) form.set('province', s.province.slice(0, 80));
+          }}
+        />
+        <TextField label="Province" maxLength={80} {...field('province')} />
+      </FormSection>
+      <FormSection title="How can we help?" icon="chat" index={3}>
+        <TextField
+          label="Message"
+          multiline
+          maxLength={1000}
+          helper={`${form.values.message.trim().length}/1000`}
+          {...field('message')}
+        />
+      </FormSection>
     </FormSheet>
   );
 }
@@ -134,7 +144,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginTop: 8,
     marginBottom: 16,
   },
 });

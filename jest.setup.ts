@@ -42,3 +42,9 @@ jest.mock('react-native-mmkv', () => ({
     };
   }),
 }));
+
+// Count-ups tick on requestAnimationFrame outside React's act(); tests assert
+// on final values, so render the target straight away.
+jest.mock('./src/ui/motion/useCountUp', () => ({
+  useCountUp: (target: number) => target,
+}));

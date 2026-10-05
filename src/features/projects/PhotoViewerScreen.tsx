@@ -14,9 +14,13 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useServices } from '../../app/ServicesContext';
 import type { RootScreenProps } from '../../navigation/types';
-import { AppText, Button } from '../../ui/components';
+import { AppText } from '../../ui/components';
+import { Icon } from '../../ui/icons';
+import { PressableScale } from '../../ui/motion';
 
 const MAX_SCALE = 4;
+/** Beyond this many photos the counter alone shows the position. */
+const MAX_DOTS = 12;
 
 const touchDistance = (e: GestureResponderEvent) => {
   const [a, b] = e.nativeEvent.touches;
@@ -191,18 +195,38 @@ export function PhotoViewerScreen({
         key={`${width}x${height}`}
       />
       <View style={[styles.bar, { paddingTop: insets.top + 8 }]}>
-        <AppText variant="label" style={styles.light} numberOfLines={1}>
-          {`${route.params.title ? `${route.params.title} · ` : ''}${
-            index + 1
-          } / ${images.length}`}
-        </AppText>
-        <Button
-          label="Close"
-          variant="ghost"
-          compact
+        <View style={styles.counter}>
+          <AppText variant="label" style={styles.light} numberOfLines={1}>
+            {`${route.params.title ? `${route.params.title} · ` : ''}${
+              index + 1
+            } / ${images.length}`}
+          </AppText>
+        </View>
+        <PressableScale
           onPress={() => navigation.goBack()}
-        />
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          hitSlop={8}
+          style={styles.close}
+        >
+          <Icon name="close" size={20} color="#FFFFFF" strokeWidth={2.2} />
+        </PressableScale>
       </View>
+      {images.length > 1 && images.length <= MAX_DOTS ? (
+        <View
+          style={[styles.dots, { bottom: insets.bottom + 20 }]}
+          pointerEvents="none"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          {images.map((uri, i) => (
+            <View
+              key={uri}
+              style={[styles.dot, i === index && styles.dotActive]}
+            />
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -217,9 +241,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
     paddingHorizontal: 16,
     paddingBottom: 8,
-    backgroundColor: 'rgba(0,0,0,0.45)',
   },
-  light: { color: '#FFFFFF', flex: 1 },
+  counter: {
+    flexShrink: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(18,19,24,0.6)',
+  },
+  light: { color: '#FFFFFF' },
+  close: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(18,19,24,0.6)',
+  },
+  dots: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: 24,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.4)',
+  },
+  dotActive: { width: 18, backgroundColor: '#FA6E52' },
 });

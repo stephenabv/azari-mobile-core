@@ -2,8 +2,10 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { Appliance } from '../../domain/quotation/Appliance';
 import { Units } from '../../domain/units/Units';
-import { AppText, Button, Card } from '../../ui/components';
-import { useThemedStyles } from '../../ui/theme/ThemeContext';
+import { AppText, Button } from '../../ui/components';
+import { Icon } from '../../ui/icons';
+import { FadeIn } from '../../ui/motion';
+import { useTheme, useThemedStyles } from '../../ui/theme/ThemeContext';
 import type { Theme } from '../../ui/theme/theme';
 
 export interface LoadProfileProps {
@@ -21,6 +23,7 @@ export function LoadProfile({
   onRemove,
 }: LoadProfileProps) {
   const styles = useThemedStyles(createStyles);
+  const { colors } = useTheme();
   const total = appliances.reduce((s, a) => s + a.usage, 0);
   return (
     <View>
@@ -28,8 +31,11 @@ export function LoadProfile({
         Optional. Add your main appliances to size the system around your actual
         usage.
       </AppText>
-      {appliances.map(a => (
-        <Card key={a.id} style={styles.row}>
+      {appliances.map((a, i) => (
+        <FadeIn key={a.id} index={i} direction="left" style={styles.row}>
+          <View style={styles.iconTile}>
+            <Icon name="bolt" size={18} color={colors.accentText} />
+          </View>
           <View style={styles.info}>
             <AppText variant="label">{`${a.name} × ${a.quantity}`}</AppText>
             <AppText variant="caption" tone="muted">
@@ -55,13 +61,15 @@ export function LoadProfile({
               onPress={() => onRemove(a.id)}
             />
           </View>
-        </Card>
+        </FadeIn>
       ))}
       {appliances.length ? (
-        <AppText
-          variant="label"
-          style={styles.total}
-        >{`Total daily usage: ${Units.grouped(total)} Wh`}</AppText>
+        <View style={styles.total}>
+          <Icon name="sun" size={16} color={colors.accentText} />
+          <AppText variant="label">{`Total daily usage: ${Units.grouped(
+            total,
+          )} Wh`}</AppText>
+        </View>
       ) : null}
       <Button
         label="Add appliance"
@@ -80,11 +88,37 @@ const createStyles = (t: Theme) =>
       flexDirection: 'row',
       flexWrap: 'wrap',
       alignItems: 'center',
-      gap: t.spacing(2),
+      gap: t.spacing(3),
       marginBottom: t.spacing(2),
       padding: t.spacing(3),
+      borderRadius: t.radius.md,
+      backgroundColor: t.colors.surfaceRaised,
+      ...(t.dark
+        ? {
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: t.colors.border,
+          }
+        : t.elevation),
     },
-    info: { flex: 1, minWidth: 200, gap: 2 },
+    iconTile: {
+      width: 36,
+      height: 36,
+      borderRadius: t.radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accentSoft,
+    },
+    info: { flex: 1, minWidth: 180, gap: 2 },
     actions: { flexDirection: 'row' },
-    total: { marginVertical: t.spacing(3) },
+    total: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: t.spacing(2),
+      marginVertical: t.spacing(3),
+      paddingHorizontal: t.spacing(3),
+      paddingVertical: t.spacing(1.5),
+      borderRadius: t.radius.pill,
+      backgroundColor: t.colors.accentSoft,
+    },
   });

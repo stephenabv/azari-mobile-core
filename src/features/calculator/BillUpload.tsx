@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useServices } from '../../app/ServicesContext';
 import type { UploadFile } from '../../core/http/RequestBody';
 import { BILL_ATTACHMENT_RULES } from '../../domain/quotation/ProposalRequest';
-import { AppText, Button, Card } from '../../ui/components';
+import { AppText, Button } from '../../ui/components';
+import { Icon } from '../../ui/icons';
+import { FadeIn, PressableScale } from '../../ui/motion';
+import { useTheme, useThemedStyles } from '../../ui/theme/ThemeContext';
+import type { Theme } from '../../ui/theme/theme';
 
 const megabytes = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(2)}MB`;
 
@@ -16,6 +20,8 @@ export function BillUpload({
   onChange: (file: UploadFile | null) => void;
 }) {
   const { attachments, logger } = useServices();
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useTheme();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   if (!attachments) return null;
@@ -39,9 +45,12 @@ export function BillUpload({
   };
 
   return (
-    <Card style={styles.card}>
+    <View style={styles.wrap}>
       {file ? (
-        <View style={styles.row}>
+        <FadeIn direction="none" fromScale={0.96} style={styles.fileRow}>
+          <View style={styles.fileIcon}>
+            <Icon name="document" size={20} color={colors.onAccent} />
+          </View>
           <View style={styles.info}>
             <AppText variant="label" numberOfLines={1}>
               {file.name}
@@ -56,39 +65,78 @@ export function BillUpload({
             compact
             onPress={() => onChange(null)}
           />
-        </View>
+        </FadeIn>
       ) : (
-        <>
-          <AppText variant="label">Upload your electricity bill</AppText>
-          <AppText variant="caption" tone="muted">
-            PDF, PNG or JPG up to 10MB. Optional.
+        <PressableScale
+          onPress={() => void pick()}
+          disabled={busy}
+          accessibilityRole="button"
+          accessibilityLabel="Choose file"
+          accessibilityHint="Upload your electricity bill. PDF, PNG or JPG up to 10MB. Optional."
+          accessibilityState={{ busy, disabled: busy }}
+          style={styles.drop}
+        >
+          {busy ? (
+            <ActivityIndicator color={colors.accentText} />
+          ) : (
+            <Icon name="upload" size={20} color={colors.text} />
+          )}
+          <View style={styles.info}>
+            <AppText variant="label">Upload your electricity bill</AppText>
+            <AppText variant="caption" tone="muted">
+              PDF, PNG or JPG up to 10MB. Optional.
+            </AppText>
+          </View>
+          <AppText variant="label" tone="accent">
+            Choose file
           </AppText>
-          <Button
-            label="Choose file"
-            variant="secondary"
-            compact
-            loading={busy}
-            onPress={() => void pick()}
-            style={styles.button}
-          />
-        </>
+        </PressableScale>
       )}
       {error ? (
         <AppText
           variant="caption"
           tone="danger"
           accessibilityLiveRegion="polite"
+          style={styles.error}
         >
           {error}
         </AppText>
       ) : null}
-    </Card>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  card: { marginBottom: 16, gap: 4 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  info: { flex: 1 },
-  button: { alignSelf: 'flex-start', marginTop: 8 },
-});
+const createStyles = (t: Theme) =>
+  StyleSheet.create({
+    wrap: { marginBottom: t.spacing(4) },
+    drop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing(3),
+      minHeight: 56,
+      paddingHorizontal: t.spacing(4),
+      paddingVertical: t.spacing(3),
+      borderRadius: t.radius.md,
+      borderWidth: 2,
+      borderStyle: 'dashed',
+      borderColor: t.colors.border,
+    },
+    fileRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing(3),
+      padding: t.spacing(3),
+      borderRadius: t.radius.md,
+      backgroundColor: t.colors.accentSoft,
+    },
+    fileIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: t.radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accent,
+    },
+    info: { flex: 1 },
+    error: { marginTop: t.spacing(2) },
+  });

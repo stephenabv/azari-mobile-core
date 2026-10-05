@@ -14,6 +14,7 @@ import {
   RichTextView,
 } from '../../ui/components';
 import { useTheme } from '../../ui/theme/ThemeContext';
+import { FONTS } from '../../ui/theme/theme';
 
 type BlockOf<T extends ContentBlock['type']> = Extract<
   ContentBlock,
@@ -36,7 +37,7 @@ function Bullets({
     <View style={depth ? styles.nested : null}>
       {items.map((item, i) => (
         <View key={i} style={styles.bulletRow}>
-          <AppText>{depth ? '◦' : '•'}</AppText>
+          <BulletDot hollow={depth > 0} />
           <View style={styles.bulletBody}>
             <AppText>
               {item.boldLead ? (
@@ -179,6 +180,20 @@ const RENDERERS: Renderers = {
   divider: () => <Divider />,
 };
 
+function BulletDot({ hollow }: { hollow: boolean }) {
+  const theme = useTheme();
+  return (
+    <View
+      style={[
+        styles.dot,
+        hollow
+          ? [styles.hollowDot, { borderColor: theme.colors.accent }]
+          : { backgroundColor: theme.colors.accent },
+      ]}
+    />
+  );
+}
+
 function Divider() {
   const theme = useTheme();
   return (
@@ -197,11 +212,13 @@ const styles = StyleSheet.create({
   block: { marginBottom: 12 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   nested: { marginTop: 4, marginLeft: 8 },
-  bulletRow: { flexDirection: 'row', gap: 8, marginBottom: 6 },
+  bulletRow: { flexDirection: 'row', gap: 10, marginBottom: 6 },
   bulletBody: { flex: 1 },
-  bold: { fontWeight: '700' },
+  bold: { fontFamily: FONTS.bold },
+  hollowDot: { borderWidth: 1.5 },
+  dot: { width: 7, height: 7, borderRadius: 4, marginTop: 7 },
   link: { textDecorationLine: 'underline' },
-  image: { borderRadius: 12, marginBottom: 6 },
+  image: { borderRadius: 16, marginBottom: 6 },
   partner: { alignItems: 'center', gap: 6, padding: 12 },
   logo: { backgroundColor: 'transparent' },
   divider: { height: StyleSheet.hairlineWidth, marginVertical: 16 },

@@ -110,14 +110,14 @@ const createStyles = (t: Theme) =>
   StyleSheet.create({
     hitArea: { height: 44, justifyContent: 'center' },
     track: {
-      height: 6,
+      height: 8,
       marginHorizontal: THUMB / 2,
-      borderRadius: 3,
+      borderRadius: 4,
       backgroundColor: t.colors.border,
       overflow: 'hidden',
     },
     fill: {
-      height: 6,
+      height: 8,
       backgroundColor: t.colors.accent,
       marginLeft: -THUMB / 2,
     },
@@ -127,8 +127,13 @@ const createStyles = (t: Theme) =>
       width: THUMB,
       height: THUMB,
       borderRadius: THUMB / 2,
-      backgroundColor: t.colors.onAccent,
+      backgroundColor: '#FFFFFF',
       borderWidth: 3,
       borderColor: t.colors.accent,
+      shadowColor: t.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 6,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 3,
     },
   });
