@@ -33,6 +33,7 @@ export type RootStackParamList = {
   ClientJourney: undefined;
   PrivacyPolicy: undefined;
   TermsConditions: undefined;
+  ConnectWithUs: undefined;
   TalkToExpert: { inquiryType?: TalkInquiryType } | undefined;
   PackageInquiry: { packageId: string; selection: PackageSelection | null };
   ApplianceEditor: { applianceId?: string } | undefined;

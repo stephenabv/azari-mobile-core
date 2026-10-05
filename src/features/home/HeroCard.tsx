@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SunRays } from '../../ui/brand';
-import { AppText, Button, Card } from '../../ui/components';
-import { FadeIn, PressableScale, Spin, useCountUp } from '../../ui/motion';
+import { AppText, ButtonRow, Card } from '../../ui/components';
+import { FadeIn, Spin, useCountUp } from '../../ui/motion';
 import { useResponsive } from '../../ui/responsive/useResponsive';
 import { useTheme, useThemedStyles } from '../../ui/theme/ThemeContext';
 import type { Theme } from '../../ui/theme/theme';
@@ -68,24 +68,23 @@ export function HeroCard({ content, actions }: HomeSectionProps) {
         </View>
         <View style={styles.footer}>
           {rating != null ? <BillReduction rating={rating} /> : null}
-          <View style={styles.ctas}>
-            <PressableScale
-              onPress={actions.openProjects}
-              accessibilityRole="button"
-              accessibilityLabel={hero.secondaryCta}
-              style={styles.outline}
-            >
-              <AppText variant="label" tone="onNight">
-                {hero.secondaryCta}
-              </AppText>
-            </PressableScale>
-            <Button
-              label={hero.primaryCta}
-              compact
-              icon="arrowRight"
-              onPress={() => actions.openCalculator()}
-            />
-          </View>
+          <ButtonRow
+            compact
+            style={styles.ctas}
+            actions={[
+              {
+                key: 'primary',
+                label: hero.primaryCta,
+                onPress: () => actions.openCalculator(),
+              },
+              {
+                key: 'secondary',
+                label: hero.secondaryCta,
+                variant: 'onNight',
+                onPress: actions.openProjects,
+              },
+            ]}
+          />
         </View>
       </Card>
     </FadeIn>
@@ -109,19 +108,5 @@ const createStyles = (t: Theme) =>
       justifyContent: 'space-between',
       gap: t.spacing(3),
     },
-    ctas: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: t.spacing(2),
-      alignItems: 'center',
-    },
-    outline: {
-      minHeight: 36,
-      paddingHorizontal: t.spacing(4),
-      borderRadius: t.radius.pill,
-      borderWidth: 1,
-      borderColor: t.colors.onNightMuted,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
+    ctas: { width: '100%' },
   });

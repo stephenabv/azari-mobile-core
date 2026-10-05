@@ -1,5 +1,6 @@
-import React from 'react';
-import Svg, { Path } from 'react-native-svg';
+import React, { useId } from 'react';
+import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
+import { GRADIENTS } from '../theme/theme';
 
 /** The Azari logo mark: three sun rays over three panel stripes. */
 const RAYS = [
@@ -15,35 +16,75 @@ const PANELS = [
 
 export const BRAND_MARK_COLORS = Object.freeze({
   rays: '#FFD600',
-  panels: '#FA6E52',
+  panels: '#FC615A',
 });
+
+/**
+ * `flat` is the solid two-colour mark; `gradient` is the website's animated
+ * loader artwork (sun and panel gradients) used by the splash and image loader.
+ */
+export type BrandMarkVariant = 'flat' | 'gradient';
+
+/** Logo artwork bounds (the website's viewBox 0 0 37 28). */
+export const BRAND_MARK_ASPECT = 37 / 28;
 
 export interface BrandMarkProps {
   size?: number;
+  variant?: BrandMarkVariant;
   /** Accessible name; omit when a visible wordmark sits next to it. */
   accessibilityLabel?: string;
 }
 
-export function BrandMark({ size = 28, accessibilityLabel }: BrandMarkProps) {
+export function BrandMark({
+  size = 28,
+  variant = 'flat',
+  accessibilityLabel,
+}: BrandMarkProps) {
+  const id = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const gradient = variant === 'gradient';
+  const raysFill = gradient ? `url(#rays${id})` : BRAND_MARK_COLORS.rays;
+  const panelsFill = gradient ? `url(#panels${id})` : BRAND_MARK_COLORS.panels;
   return (
     <Svg
       width={size}
-      height={size}
-      viewBox="0 -4.5 37 37"
+      height={gradient ? size / BRAND_MARK_ASPECT : size}
+      viewBox={gradient ? '0 0 37 28' : '0 -4.5 37 37'}
       accessible={Boolean(accessibilityLabel)}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={accessibilityLabel ? 'image' : undefined}
     >
+      {gradient ? (
+        <Defs>
+          <LinearGradient
+            id={`rays${id}`}
+            x1="29.96"
+            y1="28"
+            x2="22.19"
+            y2="9.25"
+            gradientUnits="userSpaceOnUse"
+          >
+            <Stop offset="0" stopColor={GRADIENTS.sun[0]} />
+            <Stop offset="0.45" stopColor={GRADIENTS.sun[1]} />
+            <Stop offset="1" stopColor={GRADIENTS.sun[2]} />
+          </LinearGradient>
+          <LinearGradient
+            id={`panels${id}`}
+            x1="18.3"
+            y1="0.38"
+            x2="7.96"
+            y2="27.98"
+            gradientUnits="userSpaceOnUse"
+          >
+            <Stop offset="0" stopColor={GRADIENTS.panels[0]} />
+            <Stop offset="1" stopColor={GRADIENTS.panels[1]} />
+          </LinearGradient>
+        </Defs>
+      ) : null}
       {RAYS.map(d => (
-        <Path key={d} d={d} fill={BRAND_MARK_COLORS.rays} fillRule="evenodd" />
+        <Path key={d} d={d} fill={raysFill} fillRule="evenodd" />
       ))}
       {PANELS.map(d => (
-        <Path
-          key={d}
-          d={d}
-          fill={BRAND_MARK_COLORS.panels}
-          fillRule="evenodd"
-        />
+        <Path key={d} d={d} fill={panelsFill} fillRule="evenodd" />
       ))}
     </Svg>
   );
